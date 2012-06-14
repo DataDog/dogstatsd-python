@@ -7,7 +7,7 @@ import time
 
 from nose import tools as t
 
-from dogstatsd import statsd
+from statsd import statsd
 
 
 class FakeSocket(object):
