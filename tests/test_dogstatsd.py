@@ -78,7 +78,7 @@ class TestDogStatsd(object):
     def test_sample_rate(self):
         self.statsd.increment('c', sample_rate=0)
         assert not self.recv()
-        for i in xrange(10000):
+        for i in range(10000):
             self.statsd.increment('sampled_counter', sample_rate=0.3)
         self.assert_almost_equal(3000, len(self.statsd.socket.payloads), 150)
         t.assert_equal('sampled_counter:1|c|@0.3', self.recv())
