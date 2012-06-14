@@ -12,5 +12,4 @@ setup(
     license = "BSD",
     keywords = "datadog data statsd metrics",
     url = "http://www.datadoghq.com",
-    long_description=open('README.md').read()
 )
