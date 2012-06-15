@@ -19,9 +19,10 @@ First install the library with `pip` or `easy_install`
 Then start instrumenting your code:
 
 
-    # Load and configure the module.
-
+    # Import the module.
     from statsd import statsd
+
+    # Optionally, configure the target. These are the default values.
     statsd.host = 'localhost'
     statsd.port = 8125
 
@@ -41,13 +42,6 @@ Then start instrumenting your code:
 
     # Tag a metric.
     statsd.histogram('query.time', 10, tags = ["version:1"])
-
-Documentation
--------------
-
-Full API documentation is available
-[here](http://www.pythondoc.info/github/DataDog/dogstatsd-ruby/master/frames).
-
 
 Feedback
 --------
