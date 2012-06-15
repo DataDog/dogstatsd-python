@@ -41,8 +41,8 @@ class DogStatsd(object):
         Increment a counter, optionally setting a value, tags and a sample
         rate.
 
-        >>> stats.increment('page.views')
-        >>> stats.increment('files.transferred', 124)
+        >>> statsd.increment('page.views')
+        >>> statsd.increment('files.transferred', 124)
         """
         self._send(metric, 'c', value, tags, sample_rate)
 
@@ -51,8 +51,8 @@ class DogStatsd(object):
         Decrement a counter, optionally setting a value, tags and a sample
         rate.
 
-        >>> stats.decrement('files.remaining')
-        >>> stats.decrement('active.connections', 2)
+        >>> statsd.decrement('files.remaining')
+        >>> statsd.decrement('active.connections', 2)
         """
         self._send(metric, 'c', -value, tags, sample_rate)
 
@@ -60,8 +60,8 @@ class DogStatsd(object):
         """
         Sample a histogram value, optionally setting tags and a sample rate.
 
-        >>> stats.histogram('uploaded.file.size', 1445)
-        >>> stats.histogram('album.photo.count', 26, tags=["gender:female"])
+        >>> statsd.histogram('uploaded.file.size', 1445)
+        >>> statsd.histogram('album.photo.count', 26, tags=["gender:female"])
         """
         self._send(metric, 'h', value, tags, sample_rate)
 
@@ -69,7 +69,7 @@ class DogStatsd(object):
         """
         Record a timing, optionally setting tags and a sample rate.
 
-        >>> stats.timing("query.response.time", 1234)
+        >>> statsd.timing("query.response.time", 1234)
         """
         self._send(metric, 'ms', value, tags, sample_rate)
 
