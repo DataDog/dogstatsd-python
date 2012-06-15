@@ -1,7 +1,7 @@
 dogstatsd-python
 ================
 
-A DogStatsd Python client
+A DogStatsd Python client.
 
 [![Build Status](https://secure.travis-ci.org/DataDog/dogstatsd-python.png)](http://travis-ci.org/DataDog/dogstatsd-python)
 
@@ -42,6 +42,12 @@ Then start instrumenting your code:
 
     # Tag a metric.
     statsd.histogram('query.time', 10, tags = ["version:1"])
+
+Documentation
+-------------
+
+Read the full API docs
+[here](http://dogstatsd-python.readthedocs.org/en/latest/index.html).
 
 Feedback
 --------
