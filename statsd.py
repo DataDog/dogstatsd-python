@@ -100,8 +100,6 @@ class DogStatsd(object):
             return wrapped
         return wrapper
 
-        pass
-
     def _send(self, metric, metric_type, value, tags, sample_rate):
         try:
             if sample_rate == 1 or random() < sample_rate:
