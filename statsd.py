@@ -100,6 +100,14 @@ class DogStatsd(object):
             return wrapped
         return wrapper
 
+    def set(self, metric, value, tags=None, sample_rate=1):
+        """
+        Sample a set value.
+
+        >>> statsd.set('visitors.uniques', 999)
+        """
+        self._send(metric, 's', value, tags, sample_rate)
+
     def _send(self, metric, metric_type, value, tags, sample_rate):
         try:
             if sample_rate == 1 or random() < sample_rate:

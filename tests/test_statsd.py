@@ -34,13 +34,17 @@ class BrokenSocket(FakeSocket):
         raise Exception("Socket error")
 
 class TestDogStatsd(object):
-    
+
     def setUp(self):
         self.statsd = statsd
         self.statsd.socket = FakeSocket()
 
     def recv(self):
         return self.statsd.socket.recv()
+
+    def test_set(self):
+        self.statsd.set('set', 123)
+        assert self.recv() == 'set:123|s'
 
     def test_gauge(self):
         self.statsd.gauge('gauge', 123.4)
