@@ -55,6 +55,15 @@ Feedback
 To suggest a feature, report a bug, or general discussion, head over
 [here](http://github.com/DataDog/dogstatsd-python/issues/).
 
+Change Log
+----------
+
+
+- 0.2
+    - Added the `set` metric type.
+- 0.1
+    - Initial version of the code
+
 
 License
 -------
