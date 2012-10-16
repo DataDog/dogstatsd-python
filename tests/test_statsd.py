@@ -113,8 +113,12 @@ class TestDogStatsd(object):
 
         @self.statsd.timed('timed.test')
         def func(a, b, c=1, d=1):
+            """docstring"""
             time.sleep(0.5)
             return (a, b, c, d)
+
+        t.assert_equal('func', func.__name__)
+        t.assert_equal('docstring', func.__doc__)
 
         result = func(1, 2, d=3)
         # Assert it handles args and kwargs correctly.
