@@ -58,7 +58,8 @@ To suggest a feature, report a bug, or general discussion, head over
 Change Log
 ----------
 
-
+- 0.2.1
+    - Fixed the `timed` decorator, to ensure it preserves function attributes.
 - 0.2
     - Added the `set` metric type.
 - 0.1
