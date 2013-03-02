@@ -14,7 +14,7 @@ First install the library with `pip` or `easy_install`
     sudo easy_install dogstatsd-python
     
     # .. or into a virtual env
-    easy_install  dogstatsd_python
+    easy_install  dogstatsd-python
 
 Then start instrumenting your code:
 
