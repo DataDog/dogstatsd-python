@@ -123,7 +123,7 @@ class DogStatsd(object):
                 # tuple that is updated every time we set the host or port.
                 # Also could inline sendto.
                 self.socket.sendto(payload, (self.host, self.port))
-        except:
+        except Exception:
             logger.exception("Error submitting metric")
 
 
