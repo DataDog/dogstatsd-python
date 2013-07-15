@@ -3,6 +3,7 @@ Tests for dogstatsd.py
 """
 
 from collections import deque
+import socket
 import time
 
 from nose import tools as t
@@ -16,7 +17,7 @@ class FakeSocket(object):
     def __init__(self):
         self.payloads = deque()
 
-    def sendto(self, payload, address):
+    def send(self, payload):
         self.payloads.append(payload)
 
     def recv(self):
@@ -30,8 +31,8 @@ class FakeSocket(object):
 
 class BrokenSocket(FakeSocket):
 
-    def sendto(self, payload, address):
-        raise Exception("Socket error")
+    def send(self, payload):
+        raise socket.error("Socket error")
 
 class TestDogStatsd(object):
 
@@ -131,4 +132,3 @@ class TestDogStatsd(object):
         t.assert_equal('ms', type_)
         t.assert_equal('timed.test', name)
         self.assert_almost_equal(0.5, float(value), 0.1)
-
