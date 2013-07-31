@@ -126,5 +126,39 @@ class DogStatsd(object):
         except Exception:
             logger.exception("Error submitting metric")
 
+    def _escape_event_content(self, string):
+        return string.replace('\n', '\\n')
 
-statsd = DogStatsd()
+    def event(self, title, text, alert_type=None, aggregation_key=None, source_type_name=None, date_happened=None, priority=None, tags=None, hostname=None):
+        """
+        Send an event. Attributes are the same as the Event API.
+            http://docs.datadoghq.com/api/
+
+        >>> statsd.event('Man down!', 'This server needs assistance.')
+        >>> statsd.event('The web server restarted', 'The web server is up again', alert_type='success')
+        """
+        title = unicode(self._escape_event_content(title))
+        text = unicode(self._escape_event_content(text))
+        string = '_e{%d,%d}:%s|%s' % (len(title), len(text), title, text)
+        if alert_type:
+            string = '%s|t:%s' % (string, alert_type)
+        if aggregation_key:
+            string = '%s|k:%s' % (string, aggregation_key)
+        if source_type_name:
+            string = '%s|s:%s' % (string, source_type_name)
+        if date_happened:
+            string = '%s|d:%d' % (string, date_happened)
+        if priority:
+            string = '%s|p:%s' % (string, priority)
+        if hostname:
+            string = '%s|h:%s' % (string, hostname)
+        if tags:
+            string = '%s|#%s' % (string, ','.join(tags))
+
+        if len(string) > 8 * 1024:
+            raise Exception(u'Event "%s" payload is too big (more that 8KB), event discarded' % title)
+
+        try:
+            self.socket.sendto(string, (self.host, self.port))
+        except Exception:
+            logger.exception(u'Error submitting event "%s"' % title)
