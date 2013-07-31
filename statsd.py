@@ -140,18 +140,18 @@ class DogStatsd(object):
         title = unicode(self._escape_event_content(title))
         text = unicode(self._escape_event_content(text))
         string = '_e{%d,%d}:%s|%s' % (len(title), len(text), title, text)
-        if alert_type:
-            string = '%s|t:%s' % (string, alert_type)
-        if aggregation_key:
-            string = '%s|k:%s' % (string, aggregation_key)
-        if source_type_name:
-            string = '%s|s:%s' % (string, source_type_name)
         if date_happened:
             string = '%s|d:%d' % (string, date_happened)
-        if priority:
-            string = '%s|p:%s' % (string, priority)
         if hostname:
             string = '%s|h:%s' % (string, hostname)
+        if aggregation_key:
+            string = '%s|k:%s' % (string, aggregation_key)
+        if priority:
+            string = '%s|p:%s' % (string, priority)
+        if source_type_name:
+            string = '%s|s:%s' % (string, source_type_name)
+        if alert_type:
+            string = '%s|t:%s' % (string, alert_type)
         if tags:
             string = '%s|#%s' % (string, ','.join(tags))
 

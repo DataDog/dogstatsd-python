@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tests for dogstatsd.py
 """
@@ -7,7 +8,7 @@ import time
 
 from nose import tools as t
 
-from statsd import statsd
+from statsd import DogStatsd
 
 
 class FakeSocket(object):
@@ -36,7 +37,7 @@ class BrokenSocket(FakeSocket):
 class TestDogStatsd(object):
 
     def setUp(self):
-        self.statsd = statsd
+        self.statsd = DogStatsd()
         self.statsd.socket = FakeSocket()
 
     def recv(self):
@@ -99,6 +100,13 @@ class TestDogStatsd(object):
     def test_timing(self):
         self.statsd.timing('t', 123)
         t.assert_equal('t:123|ms', self.recv())
+
+    def test_event(self):
+        self.statsd.event('Title', u'L1\nL2', priority='low', date_happened=1375296969)
+        t.assert_equal(u'_e{5,6}:Title|L1\\nL2|d:1375296969|p:low', self.recv())
+
+        self.statsd.event('Title', u'♬ †øU †øU ¥ºu T0µ ♪', aggregation_key='key', tags=['t1', 't2:v2'])
+        t.assert_equal(u'_e{5,19}:Title|♬ †øU †øU ¥ºu T0µ ♪|k:key|#t1,t2:v2', self.recv())
 
     @staticmethod
     def assert_almost_equal(a, b, delta):
