@@ -13,7 +13,7 @@ except ImportError:
     imap = map
 
 
-logger = logging.getLogger('dogstatsd')
+log = logging.getLogger('dogstatsd')
 
 
 class DogStatsd(object):
@@ -27,10 +27,19 @@ class DogStatsd(object):
         :param host: the host of the DogStatsd server.
         :param port: the port of the DogStatsd server.
         """
+        self._host = None
+        self._port = None
+        self.socket = None
+        self.connect(host, port)
 
-        self._host, self._port = host, int(port)
+    def connect(self, host, port):
+        """
+        Connect to the statsd server on the given host and port.
+        """
+        self._host = host
+        self._port = int(port)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.connect((host, self._port))
+        self.socket.connect((self._host, self._port))
 
     def gauge(self, metric, value, tags=None, sample_rate=1):
         """
@@ -130,7 +139,7 @@ class DogStatsd(object):
         try:
             self.socket.send("".join(imap(str, payload)))
         except socket.error:
-            logger.exception("Error submitting metric")
+            log.exception("Error submitting metric")
 
 
 statsd = DogStatsd()

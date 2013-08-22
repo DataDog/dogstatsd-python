@@ -132,3 +132,11 @@ class TestDogStatsd(object):
         t.assert_equal('ms', type_)
         t.assert_equal('timed.test', name)
         self.assert_almost_equal(0.5, float(value), 0.1)
+
+
+if __name__ == '__main__':
+    statsd = statsd
+    while True:
+        statsd.gauge('test.gauge', 1)
+        statsd.increment('test.count', 2)
+        time.sleep(0.05)
