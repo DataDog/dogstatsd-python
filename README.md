@@ -22,9 +22,6 @@ Then start instrumenting your code:
 # Import the module.
 from statsd import statsd
 
-# Import the module.
-from statsd import statsd
-
 # Optionally, configure the host and port if you're running Statsd on a
 # non-standard port.
 statsd.connect('localhost', 8125)
