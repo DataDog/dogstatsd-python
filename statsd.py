@@ -174,6 +174,6 @@ class DogStatsd(object):
             raise Exception(u'Event "%s" payload is too big (more that 8KB), event discarded' % title)
 
         try:
-            self.socket.sendto(string, (self.host, self.port))
+            self.socket.send(string)
         except Exception:
-            logger.exception(u'Error submitting event "%s"' % title)
+            log.exception(u'Error submitting event "%s"' % title)
