@@ -21,9 +21,7 @@ dogstatsd-python
     configuration.
 
     >>> from statsd import statsd
-    >>> statsd.host = 'localhost'
-    >>> statsd.port = 8125
-
+    >>> statsd.connect(host='localhost', port=8125)
 
 Source
 ======

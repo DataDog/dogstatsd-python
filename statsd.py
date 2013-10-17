@@ -4,11 +4,16 @@ DogStatsd is a Python client for DogStatsd, a Statsd fork for Datadog.
 
 import logging
 from random import random
-from socket import socket, AF_INET, SOCK_DGRAM
 from time import time
+import socket
+
+try:
+    from itertools import imap
+except ImportError:
+    imap = map
 
 
-logger = logging.getLogger('dogstatsd')
+log = logging.getLogger('dogstatsd')
 
 
 class DogStatsd(object):
@@ -22,9 +27,19 @@ class DogStatsd(object):
         :param host: the host of the DogStatsd server.
         :param port: the port of the DogStatsd server.
         """
-        self.host = host
-        self.port = port
-        self.socket = socket(AF_INET, SOCK_DGRAM)
+        self._host = None
+        self._port = None
+        self.socket = None
+        self.connect(host, port)
+
+    def connect(self, host, port):
+        """
+        Connect to the statsd server on the given host and port.
+        """
+        self._host = host
+        self._port = int(port)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.connect((self._host, self._port))
 
     def gauge(self, metric, value, tags=None, sample_rate=1):
         """
@@ -112,19 +127,19 @@ class DogStatsd(object):
         self._send(metric, 's', value, tags, sample_rate)
 
     def _send(self, metric, metric_type, value, tags, sample_rate):
+        if sample_rate != 1 and random() > sample_rate:
+            return
+
+        payload = [metric, ":", value, "|", metric_type]
+        if sample_rate != 1:
+            payload.extend(["|@", sample_rate])
+        if tags:
+            payload.extend(["|#", ",".join(tags)])
+
         try:
-            if sample_rate == 1 or random() < sample_rate:
-                payload = metric + ':' + str(value) + '|' + metric_type
-                if sample_rate != 1:
-                    payload += '|@' + str(sample_rate)
-                if tags:
-                    payload += '|#' + ','.join(tags)
-                # FIXME: we could make this faster by having a self.address
-                # tuple that is updated every time we set the host or port.
-                # Also could inline sendto.
-                self.socket.sendto(payload, (self.host, self.port))
-        except Exception:
-            logger.exception("Error submitting metric")
+            self.socket.send("".join(imap(str, payload)))
+        except socket.error:
+            log.exception("Error submitting metric")
 
     def _escape_event_content(self, string):
         return string.replace('\n', '\\n')
