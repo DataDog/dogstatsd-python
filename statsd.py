@@ -152,9 +152,9 @@ class DogStatsd(object):
         >>> statsd.event('Man down!', 'This server needs assistance.')
         >>> statsd.event('The web server restarted', 'The web server is up again', alert_type='success')
         """
-        title = unicode(self._escape_event_content(title))
-        text = unicode(self._escape_event_content(text))
-        string = '_e{%d,%d}:%s|%s' % (len(title), len(text), title, text)
+        title = self._escape_event_content(title)
+        text = self._escape_event_content(text)
+        string = u'_e{%d,%d}:%s|%s' % (len(title), len(text), title, text)
         if date_happened:
             string = '%s|d:%d' % (string, date_happened)
         if hostname:
