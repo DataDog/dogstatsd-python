@@ -58,8 +58,9 @@ To suggest a feature, report a bug, or general discussion, head over
 
 Change Log
 ----------
-
-- 0.3
+- 0.4.0
+    - Added support for sending events.
+- 0.3.0
     - Uses a connected socket for a big performance improvemen (thanks to [@Julian](https://github.com/Julian))
     - Use `connect` to override the host and port of a statsd instance
 - 0.2.1
