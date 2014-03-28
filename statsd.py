@@ -177,3 +177,6 @@ class DogStatsd(object):
             self.socket.send(string)
         except Exception:
             log.exception(u'Error submitting event "%s"' % title)
+
+
+statsd = DogStatsd()
