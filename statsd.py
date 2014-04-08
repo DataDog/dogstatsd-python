@@ -90,7 +90,7 @@ class DogStatsd(object):
 
     def timed(self, metric, tags=None, sample_rate=1):
         """
-        A decorator that will mesaure the distribution of a function's run time.
+        A decorator that will measure the distribution of a function's run time.
         Optionally specify a list of tag or a sample rate.
         ::
 
