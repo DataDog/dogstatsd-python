@@ -12,4 +12,5 @@ setup(
     license = "BSD",
     keywords = "datadog data statsd metrics",
     url = "http://www.datadoghq.com",
+    install_requires=['six']
 )
