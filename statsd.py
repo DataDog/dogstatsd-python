@@ -31,6 +31,7 @@ class DogStatsd(object):
         self._port = None
         self.socket = None
         self.connect(host, port)
+        self.encoding = 'utf-8'
 
     def connect(self, host, port):
         """
@@ -137,7 +138,8 @@ class DogStatsd(object):
             payload.extend(["|#", ",".join(tags)])
 
         try:
-            self.socket.send("".join(imap(str, payload)))
+            encoded = "".join(imap(str, payload)).encode(self.encoding)
+            self.socket.send(encoded)
         except socket.error:
             log.exception("Error submitting metric")
 
@@ -174,7 +176,7 @@ class DogStatsd(object):
             raise Exception(u'Event "%s" payload is too big (more that 8KB), event discarded' % title)
 
         try:
-            self.socket.send(string)
+            self.socket.send(string.encode(self.encoding))
         except Exception:
             log.exception(u'Error submitting event "%s"' % title)
 

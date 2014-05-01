@@ -4,6 +4,7 @@ Tests for dogstatsd.py
 """
 
 from collections import deque
+import six
 import socket
 import time
 
@@ -20,11 +21,12 @@ class FakeSocket(object):
         self.payloads = deque()
 
     def send(self, payload):
+        assert type(payload) == six.binary_type
         self.payloads.append(payload)
 
     def recv(self):
         try:
-            return self.payloads.popleft()
+            return self.payloads.popleft().decode('utf-8')
         except IndexError:
             return None
 
