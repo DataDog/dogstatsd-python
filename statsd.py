@@ -6,6 +6,7 @@ import logging
 from random import random
 from time import time
 import socket
+from functools import wraps
 
 try:
     from itertools import imap
@@ -107,14 +108,12 @@ class DogStatsd(object):
                 statsd.timing('user.query.time', time.time() - start)
         """
         def wrapper(func):
+            @wraps(func)
             def wrapped(*args, **kwargs):
                 start = time()
                 result = func(*args, **kwargs)
                 self.timing(metric, time() - start, tags=tags, sample_rate=sample_rate)
                 return result
-            wrapped.__name__ = func.__name__
-            wrapped.__doc__  = func.__doc__
-            wrapped.__dict__.update(func.__dict__)
             return wrapped
         return wrapper
 
