@@ -19,7 +19,7 @@ log = logging.getLogger('dogstatsd')
 
 class DogStatsd(object):
 
-    def __init__(self, host='localhost', port=8125):
+    def __init__(self, host='localhost', port=8125, max_buffer_size = 50):
         """
         Initialize a DogStatsd object.
 
@@ -27,11 +27,44 @@ class DogStatsd(object):
 
         :param host: the host of the DogStatsd server.
         :param port: the port of the DogStatsd server.
+        :param max_buffer_size: Maximum number of metric to buffer before sending to the server if sending metrics in batch
         """
         self._host = None
         self._port = None
         self.socket = None
+        self.max_buffer_size = max_buffer_size
+        self._send = self._send_to_server
         self.connect(host, port)
+
+
+    def __enter__(self):
+        self.open_buffer(self.max_buffer_size)
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close_buffer()
+
+    def open_buffer(self, max_buffer_size=50):
+        '''
+        Open a buffer to send a batch of metrics in one packet
+
+        You can also use this as a context manager.
+
+        >>> with DogStatsd() as batch:
+        >>>     batch.gauge('users.online', 123)
+        >>>     batch.gauge('active.connections', 1001)
+
+        '''
+        self.max_buffer_size = max_buffer_size or self.max_buffer_size
+        self.buffer= []
+        self._send = self._send_to_buffer
+
+    def close_buffer(self):
+        '''
+        Flush the buffer and switch back to single metric packets
+        '''
+        self._send = self._send_to_server
+        self._flush_buffer()
 
     def connect(self, host, port):
         """
@@ -50,7 +83,7 @@ class DogStatsd(object):
         >>> statsd.gauge('users.online', 123)
         >>> statsd.gauge('active.connections', 1001, tags=["protocol:http"])
         """
-        return self._send(metric, 'g', value, tags, sample_rate)
+        return self._report(metric, 'g', value, tags, sample_rate)
 
     def increment(self, metric, value=1, tags=None, sample_rate=1):
         """
@@ -60,7 +93,7 @@ class DogStatsd(object):
         >>> statsd.increment('page.views')
         >>> statsd.increment('files.transferred', 124)
         """
-        self._send(metric, 'c', value, tags, sample_rate)
+        self._report(metric, 'c', value, tags, sample_rate)
 
     def decrement(self, metric, value=1, tags=None, sample_rate=1):
         """
@@ -70,7 +103,7 @@ class DogStatsd(object):
         >>> statsd.decrement('files.remaining')
         >>> statsd.decrement('active.connections', 2)
         """
-        self._send(metric, 'c', -value, tags, sample_rate)
+        self._report(metric, 'c', -value, tags, sample_rate)
 
     def histogram(self, metric, value, tags=None, sample_rate=1):
         """
@@ -79,7 +112,7 @@ class DogStatsd(object):
         >>> statsd.histogram('uploaded.file.size', 1445)
         >>> statsd.histogram('album.photo.count', 26, tags=["gender:female"])
         """
-        self._send(metric, 'h', value, tags, sample_rate)
+        self._report(metric, 'h', value, tags, sample_rate)
 
     def timing(self, metric, value, tags=None, sample_rate=1):
         """
@@ -87,7 +120,7 @@ class DogStatsd(object):
 
         >>> statsd.timing("query.response.time", 1234)
         """
-        self._send(metric, 'ms', value, tags, sample_rate)
+        self._report(metric, 'ms', value, tags, sample_rate)
 
     def timed(self, metric, tags=None, sample_rate=1):
         """
@@ -123,9 +156,9 @@ class DogStatsd(object):
 
         >>> statsd.set('visitors.uniques', 999)
         """
-        self._send(metric, 's', value, tags, sample_rate)
+        self._report(metric, 's', value, tags, sample_rate)
 
-    def _send(self, metric, metric_type, value, tags, sample_rate):
+    def _report(self, metric, metric_type, value, tags, sample_rate):
         if sample_rate != 1 and random() > sample_rate:
             return
 
@@ -135,10 +168,22 @@ class DogStatsd(object):
         if tags:
             payload.extend(["|#", ",".join(tags)])
 
+        self._send("".join(imap(str,payload)))
+
+    def _send_to_server(self, packet):
         try:
-            self.socket.send("".join(imap(str, payload)))
+            self.socket.send(packet)
         except socket.error:
             log.exception("Error submitting metric")
+
+    def _send_to_buffer(self, packet):
+        self.buffer.append(packet)
+        if len(self.buffer) > self.max_buffer_size:
+            self._flush_buffer()
+
+    def _flush_buffer(self):
+        self._send_to_server("\n".join(self.buffer))
+        self.buffer=[]
 
     def _escape_event_content(self, string):
         return string.replace('\n', '\\n')
