@@ -55,7 +55,7 @@ class DogStatsd(object):
         >>>     batch.gauge('active.connections', 1001)
 
         '''
-        self.max_buffer_size = max_buffer_size or self.max_buffer_size
+        self.max_buffer_size = max_buffer_size
         self.buffer= []
         self._send = self._send_to_buffer
 
