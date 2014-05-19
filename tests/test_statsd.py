@@ -142,6 +142,24 @@ class TestDogStatsd(object):
         t.assert_equal('timed.test', name)
         self.assert_almost_equal(0.5, float(value), 0.1)
 
+    def test_batched(self):
+        self.statsd.open_buffer()
+        self.statsd.gauge('page.views',123)
+        self.statsd.timing('timer',123)
+        self.statsd.close_buffer()
+
+        t.assert_equal('page.views:123|g\ntimer:123|ms', self.recv())
+
+    def test_context_manager(self):
+        fake_socket = FakeSocket()
+        with DogStatsd() as statsd:
+            statsd.socket = fake_socket
+            statsd.gauge('page.views',123)
+            statsd.timing('timer',123)
+
+        t.assert_equal('page.views:123|g\ntimer:123|ms', fake_socket.recv())
+
+
     def test_module_level_instance(self):
         t.assert_true(isinstance(statsd.statsd, statsd.DogStatsd))
 
