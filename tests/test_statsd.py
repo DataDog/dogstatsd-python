@@ -159,6 +159,15 @@ class TestDogStatsd(object):
 
         t.assert_equal('page.views:123|g\ntimer:123|ms', fake_socket.recv())
 
+    def test_batched_buffer_autoflush(self):
+        fake_socket = FakeSocket()
+        with DogStatsd() as statsd:
+            statsd.socket = fake_socket
+            for i in range(51):
+                statsd.increment('mycounter')
+            t.assert_equal('\n'.join(['mycounter:1|c' for i in range(50)]), fake_socket.recv())
+
+        t.assert_equal('mycounter:1|c', fake_socket.recv())
 
     def test_module_level_instance(self):
         t.assert_true(isinstance(statsd.statsd, statsd.DogStatsd))

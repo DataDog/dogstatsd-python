@@ -178,7 +178,7 @@ class DogStatsd(object):
 
     def _send_to_buffer(self, packet):
         self.buffer.append(packet)
-        if len(self.buffer) > self.max_buffer_size:
+        if len(self.buffer) >= self.max_buffer_size:
             self._flush_buffer()
 
     def _flush_buffer(self):
