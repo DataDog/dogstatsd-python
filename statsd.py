@@ -32,6 +32,7 @@ class DogStatsd(object):
         self._port = None
         self.socket = None
         self.connect(host, port)
+        self.encoding = 'utf-8'
 
     def connect(self, host, port):
         """
@@ -91,8 +92,8 @@ class DogStatsd(object):
 
     def timed(self, metric, tags=None, sample_rate=1):
         """
-        A decorator that will measure the distribution of a function's run time.
-        Optionally specify a list of tag or a sample rate.
+        A decorator that will measure the distribution of a function's run
+        time.  Optionally specify a list of tag or a sample rate.
         ::
 
             @statsd.timed('user.query.time', sample_rate=0.5)
@@ -112,8 +113,12 @@ class DogStatsd(object):
             def wrapped(*args, **kwargs):
                 start = time()
                 result = func(*args, **kwargs)
-                self.timing(metric, time() - start, tags=tags, sample_rate=sample_rate)
+                self.timing(metric, time() - start, tags=tags,
+                            sample_rate=sample_rate)
                 return result
+            wrapped.__name__ = func.__name__
+            wrapped.__doc__ = func.__doc__
+            wrapped.__dict__.update(func.__dict__)
             return wrapped
         return wrapper
 
@@ -136,20 +141,23 @@ class DogStatsd(object):
             payload.extend(["|#", ",".join(tags)])
 
         try:
-            self.socket.send("".join(imap(str, payload)))
+            encoded = "".join(imap(str, payload)).encode(self.encoding)
+            self.socket.send(encoded)
         except socket.error:
             log.exception("Error submitting metric")
 
     def _escape_event_content(self, string):
         return string.replace('\n', '\\n')
 
-    def event(self, title, text, alert_type=None, aggregation_key=None, source_type_name=None, date_happened=None, priority=None, tags=None, hostname=None):
+    def event(self, title, text, alert_type=None, aggregation_key=None,
+              source_type_name=None, date_happened=None, priority=None,
+              tags=None, hostname=None):
         """
         Send an event. Attributes are the same as the Event API.
             http://docs.datadoghq.com/api/
 
         >>> statsd.event('Man down!', 'This server needs assistance.')
-        >>> statsd.event('The web server restarted', 'The web server is up again', alert_type='success')
+        >>> statsd.event('The web server restarted', 'The web server is up again', alert_type='success')  # NOQA
         """
         title = self._escape_event_content(title)
         text = self._escape_event_content(text)
@@ -170,10 +178,11 @@ class DogStatsd(object):
             string = '%s|#%s' % (string, ','.join(tags))
 
         if len(string) > 8 * 1024:
-            raise Exception(u'Event "%s" payload is too big (more that 8KB), event discarded' % title)
+            raise Exception(u'Event "%s" payload is too big (more that 8KB), '
+                            'event discarded' % title)
 
         try:
-            self.socket.send(string)
+            self.socket.send(string.encode(self.encoding))
         except Exception:
             log.exception(u'Error submitting event "%s"' % title)
 
