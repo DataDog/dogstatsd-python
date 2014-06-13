@@ -69,6 +69,11 @@ To suggest a feature, report a bug, or general discussion, head over
 
 Change Log
 ----------
+
+- 0.5.1
+    - Add support for batch sending metrics
+- 0.5.0
+    - Encode Binary payload with UTF-8
 - 0.4.1
     - Re-add global statsd instance (thanks to [@Julian](https://github.com/Julian)).
 - 0.4.0
