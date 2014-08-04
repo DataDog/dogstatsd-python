@@ -70,6 +70,8 @@ To suggest a feature, report a bug, or general discussion, head over
 Change Log
 ----------
 
+- 0.5.2
+    - Recreate a socket on SocketError to not stay stuck
 - 0.5.1
     - Add support for batch sending metrics
 - 0.5.0
