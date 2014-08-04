@@ -177,7 +177,12 @@ class DogStatsd(object):
         try:
             self.socket.send(packet.encode(self.encoding))
         except socket.error:
-            log.exception("Error submitting metric")
+            log.info("Error submitting metric, will try refreshing the socket")
+            self.connect(self._host, self._port)
+            try:
+                self.socket.send(packet.encode(self.encoding))
+            except socket.error:
+                log.exception("Failed to send packet with a newly binded socket")
 
     def _send_to_buffer(self, packet):
         self.buffer.append(packet)
