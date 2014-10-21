@@ -18,6 +18,7 @@ log = logging.getLogger('dogstatsd')
 
 
 class DogStatsd(object):
+    OK, WARNING, CRITICAL, UNKNOWN = (0, 1, 2, 3)
 
     def __init__(self, host='localhost', port=8125, max_buffer_size = 50):
         """
@@ -193,8 +194,8 @@ class DogStatsd(object):
         self._send_to_server("\n".join(self.buffer))
         self.buffer=[]
 
-    def _escape_event_content(self, string):
-        return string.replace('\n', '\\n')
+    def _escape_content(self, string):
+        return string.replace('\n', '\\n').replace('|m:', '|\m:')
 
     def event(self, title, text, alert_type=None, aggregation_key=None,
               source_type_name=None, date_happened=None, priority=None,
@@ -206,8 +207,8 @@ class DogStatsd(object):
         >>> statsd.event('Man down!', 'This server needs assistance.')
         >>> statsd.event('The web server restarted', 'The web server is up again', alert_type='success')  # NOQA
         """
-        title = self._escape_event_content(title)
-        text = self._escape_event_content(text)
+        title = self._escape_content(title)
+        text = self._escape_content(text)
         string = u'_e{%d,%d}:%s|%s' % (len(title), len(text), title, text)
         if date_happened:
             string = '%s|d:%d' % (string, date_happened)
@@ -232,6 +233,33 @@ class DogStatsd(object):
             self.socket.send(string.encode(self.encoding))
         except Exception:
             log.exception(u'Error submitting event "%s"' % title)
+
+    def service_check(self, check_name, status, tags=None, timestamp=None,
+                      hostname=None, check_run_id=None, message=None):
+        """
+        Send a service check run.
+
+        >>> statsd.service_check('my_service.check_name', DogStatsd.WARNING)
+        """
+        message = self._escape_content(message) if message is not None else ''
+
+        string = u'_sc|{0}|{1}'.format(check_name, status)
+
+        if timestamp:
+            string = '{0}|d:{1}'.format(string, timestamp)
+        if check_run_id:
+            string = '{0}|i:{1}'.format(string, check_run_id)
+        if hostname:
+            string = '{0}|h:{1}'.format(string, hostname)
+        if tags:
+            string = '{0}|#{1}'.format(string, ','.join(tags))
+
+        string = '{0}|m:{1}'.format(string, message)
+
+        try:
+            self.socket.send(string.encode(self.encoding))
+        except Exception:
+            log.exception(u'Error submitting service check "{0}"'.format(check_name))
 
 
 statsd = DogStatsd()
