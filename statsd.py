@@ -194,7 +194,10 @@ class DogStatsd(object):
         self._send_to_server("\n".join(self.buffer))
         self.buffer=[]
 
-    def _escape_content(self, string):
+    def _escape_event_content(self, string):
+        return string.replace('\n', '\\n')
+
+    def _escape_service_check_message(self, string):
         return string.replace('\n', '\\n').replace('m:', 'm\:')
 
     def event(self, title, text, alert_type=None, aggregation_key=None,
@@ -207,8 +210,8 @@ class DogStatsd(object):
         >>> statsd.event('Man down!', 'This server needs assistance.')
         >>> statsd.event('The web server restarted', 'The web server is up again', alert_type='success')  # NOQA
         """
-        title = self._escape_content(title)
-        text = self._escape_content(text)
+        title = self._escape_event_content(title)
+        text = self._escape_event_content(text)
         string = u'_e{%d,%d}:%s|%s' % (len(title), len(text), title, text)
         if date_happened:
             string = '%s|d:%d' % (string, date_happened)
@@ -241,7 +244,7 @@ class DogStatsd(object):
 
         >>> statsd.service_check('my_service.check_name', DogStatsd.WARNING)
         """
-        message = self._escape_content(message) if message is not None else ''
+        message = self._escape_service_check_message(message) if message is not None else ''
 
         string = u'_sc|{0}|{1}'.format(check_name, status)
 
