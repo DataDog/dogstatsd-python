@@ -253,8 +253,8 @@ class DogStatsd(object):
             string = u'{0}|h:{1}'.format(string, hostname)
         if tags:
             string = u'{0}|#{1}'.format(string, ','.join(tags))
-
-        string = u'{0}|m:{1}'.format(string, message)
+        if message:
+            string = u'{0}|m:{1}'.format(string, message)
 
         try:
             self.socket.send(string.encode(self.encoding))
