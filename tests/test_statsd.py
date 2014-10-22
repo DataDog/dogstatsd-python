@@ -118,7 +118,7 @@ class TestDogStatsd(object):
                 tags=['key1:val1','key2:val2'], timestamp=now, hostname='i-abcd1234',
                 check_run_id=0, message=u"♬ †øU \n†øU ¥ºu|m: T0µ ♪")
         t.assert_equal(u'_sc|my_check.name|{0}|d:{1}|i:0|h:i-abcd1234|#key1:val1,key2:val2|m:{2}'.format(
-                self.statsd.WARNING, now, u"♬ †øU \\n†øU ¥ºu|\m: T0µ ♪"), self.recv())
+                self.statsd.WARNING, now, u"♬ †øU \\n†øU ¥ºu|m\: T0µ ♪"), self.recv())
 
     @staticmethod
     def assert_almost_equal(a, b, delta):
