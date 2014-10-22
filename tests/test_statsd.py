@@ -112,6 +112,14 @@ class TestDogStatsd(object):
         self.statsd.event('Title', u'♬ †øU †øU ¥ºu T0µ ♪', aggregation_key='key', tags=['t1', 't2:v2'])
         t.assert_equal(u'_e{5,19}:Title|♬ †øU †øU ¥ºu T0µ ♪|k:key|#t1,t2:v2', self.recv())
 
+    def test_service_check(self):
+        now = int(time.time())
+        self.statsd.service_check('my_check.name', self.statsd.WARNING,
+                tags=['key1:val1','key2:val2'], timestamp=now, hostname='i-abcd1234',
+                check_run_id=0, message=u"♬ †øU \n†øU ¥ºu|m: T0µ ♪")
+        t.assert_equal(u'_sc|my_check.name|{0}|d:{1}|i:0|h:i-abcd1234|#key1:val1,key2:val2|m:{2}'.format(
+                self.statsd.WARNING, now, u"♬ †øU \\n†øU ¥ºu|\m: T0µ ♪"), self.recv())
+
     @staticmethod
     def assert_almost_equal(a, b, delta):
         assert 0 <= abs(a - b) <= delta, "%s - %s not within %s" % (a, b, delta)

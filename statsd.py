@@ -246,15 +246,15 @@ class DogStatsd(object):
         string = u'_sc|{0}|{1}'.format(check_name, status)
 
         if timestamp:
-            string = '{0}|d:{1}'.format(string, timestamp)
-        if check_run_id:
-            string = '{0}|i:{1}'.format(string, check_run_id)
+            string = u'{0}|d:{1}'.format(string, timestamp)
+        if check_run_id is not None:
+            string = u'{0}|i:{1}'.format(string, check_run_id)
         if hostname:
-            string = '{0}|h:{1}'.format(string, hostname)
+            string = u'{0}|h:{1}'.format(string, hostname)
         if tags:
-            string = '{0}|#{1}'.format(string, ','.join(tags))
+            string = u'{0}|#{1}'.format(string, ','.join(tags))
 
-        string = '{0}|m:{1}'.format(string, message)
+        string = u'{0}|m:{1}'.format(string, message)
 
         try:
             self.socket.send(string.encode(self.encoding))
