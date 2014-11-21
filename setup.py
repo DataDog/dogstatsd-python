@@ -10,5 +10,6 @@ setup(
     py_modules=['statsd'],
     license = "BSD",
     keywords = "datadog data statsd metrics",
-    url = "http://www.datadoghq.com"
+    url = "http://www.datadoghq.com",
+    test_suite = "nose.collector"
 )

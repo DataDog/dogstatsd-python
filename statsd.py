@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 DogStatsd is a Python client for DogStatsd, a Statsd fork for Datadog.
 """
@@ -19,7 +20,7 @@ log = logging.getLogger('dogstatsd')
 
 class DogStatsd(object):
 
-    def __init__(self, host='localhost', port=8125, max_buffer_size = 50):
+    def __init__(self, host='localhost', port=8125, max_buffer_size=50):
         """
         Initialize a DogStatsd object.
 
@@ -29,14 +30,13 @@ class DogStatsd(object):
         :param port: the port of the DogStatsd server.
         :param max_buffer_size: Maximum number of metric to buffer before sending to the server if sending metrics in batch
         """
-        self._host = None
-        self._port = None
+        self._host = host
+        self._port = int(port)
         self.socket = None
         self.max_buffer_size = max_buffer_size
         self._send = self._send_to_server
-        self.connect(host, port)
-        self.encoding = 'utf-8'
 
+        self.encoding = 'utf-8'
 
     def __enter__(self):
         self.open_buffer(self.max_buffer_size)
@@ -44,6 +44,24 @@ class DogStatsd(object):
 
     def __exit__(self, type, value, traceback):
         self.close_buffer()
+
+    @property
+    def socket(self):
+        '''
+        Return a connected socket
+        '''
+        if not self._socket:
+            self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self._socket.connect((self._host, self._port))
+        return self._socket
+
+    @socket.setter
+    def socket(self, value):
+        '''
+        Set the socket to an arbitrary value. Useful for testing, providing your own connection, or resetting the connection.
+        :param value: the value of the new socket. Use something falsy to reset the connection. Anything with a `send` method that accepts a string is valid.
+        '''
+        self._socket = value
 
     def open_buffer(self, max_buffer_size=50):
         '''
@@ -57,7 +75,7 @@ class DogStatsd(object):
 
         '''
         self.max_buffer_size = max_buffer_size
-        self.buffer= []
+        self.buffer = []
         self._send = self._send_to_buffer
 
     def close_buffer(self):
@@ -66,15 +84,6 @@ class DogStatsd(object):
         '''
         self._send = self._send_to_server
         self._flush_buffer()
-
-    def connect(self, host, port):
-        """
-        Connect to the statsd server on the given host and port.
-        """
-        self._host = host
-        self._port = int(port)
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.connect((self._host, self._port))
 
     def gauge(self, metric, value, tags=None, sample_rate=1):
         """
@@ -178,7 +187,7 @@ class DogStatsd(object):
             self.socket.send(packet.encode(self.encoding))
         except socket.error:
             log.info("Error submitting metric, will try refreshing the socket")
-            self.connect(self._host, self._port)
+            self.socket = None
             try:
                 self.socket.send(packet.encode(self.encoding))
             except socket.error:
@@ -191,7 +200,7 @@ class DogStatsd(object):
 
     def _flush_buffer(self):
         self._send_to_server("\n".join(self.buffer))
-        self.buffer=[]
+        self.buffer = []
 
     def _escape_event_content(self, string):
         return string.replace('\n', '\\n')
