@@ -16,7 +16,7 @@ Make your change. Add tests for your change. Make the tests pass:
 
 Push to your fork and [submit a pull request][pr].
 
-[pr]: https://github.com/DataDog/dogstatsd-python/compare/
+[pr]: https://github.com/your-username/dogstatsd-python/compare/DataDog:master...master
 
 At this point you're waiting on us. We may suggest some changes or
 improvements or alternatives.
