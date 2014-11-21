@@ -8,7 +8,7 @@ Fork, then clone the repo:
 
 Make sure the tests pass:
 
-    pip install nosetests; python setup.py test
+    pip install nose six; python setup.py test
 
 Make your change. Add tests for your change. Make the tests pass:
 

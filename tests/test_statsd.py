@@ -176,12 +176,12 @@ class TestDogStatsd(object):
 
     def test_instantiating_does_not_connect(self):
         dogpound = DogStatsd()
-        t.assert_is_none(dogpound._socket)
+        t.assert_equal(None, dogpound._socket)
 
     def test_accessing_socket_opens_socket(self):
         dogpound = DogStatsd()
         try:
-            t.assert_is_not_none(dogpound.socket)
+            t.assert_not_equal(None, dogpound.socket)
         finally:
             dogpound.socket.close()
 
