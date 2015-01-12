@@ -238,7 +238,7 @@ class DogStatsd(object):
             log.exception(u'Error submitting event "%s"' % title)
 
     def service_check(self, check_name, status, tags=None, timestamp=None,
-                      hostname=None, check_run_id=None, message=None):
+                      hostname=None, message=None):
         """
         Send a service check run.
 
@@ -250,8 +250,6 @@ class DogStatsd(object):
 
         if timestamp:
             string = u'{0}|d:{1}'.format(string, timestamp)
-        if check_run_id is not None:
-            string = u'{0}|i:{1}'.format(string, check_run_id)
         if hostname:
             string = u'{0}|h:{1}'.format(string, hostname)
         if tags:
