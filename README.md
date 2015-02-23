@@ -70,6 +70,8 @@ To suggest a feature, report a bug, or general discussion, head over
 Change Log
 ----------
 
+- 0.5.3
+    - Add support for service checks
 - 0.5.2
     - Recreate a socket on SocketError to not stay stuck
 - 0.5.1
@@ -94,4 +96,4 @@ Change Log
 License
 -------
 
-Copyright (c) 2012 Datadog Inc.
+Copyright (c) 2015 Datadog Inc.
