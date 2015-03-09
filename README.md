@@ -70,6 +70,8 @@ To suggest a feature, report a bug, or general discussion, head over
 Change Log
 ----------
 
+- 0.5.4
+    - Do not open a socket when `DogStatsd` is instantiated (thanks to [benweatherman](https://github.com/benweatherman))
 - 0.5.3
     - Add support for service checks
 - 0.5.2
