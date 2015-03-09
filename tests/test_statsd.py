@@ -182,6 +182,25 @@ class TestDogStatsd(object):
     def test_module_level_instance(self):
         t.assert_true(isinstance(statsd.statsd, statsd.DogStatsd))
 
+    def test_instantiating_does_not_connect(self):
+        dogpound = DogStatsd()
+        t.assert_equal(None, dogpound._socket)
+
+    def test_accessing_socket_opens_socket(self):
+        dogpound = DogStatsd()
+        try:
+            t.assert_not_equal(None, dogpound.socket)
+        finally:
+            dogpound.socket.close()
+
+    def test_accessing_socket_multiple_times_returns_same_socket(self):
+        dogpound = DogStatsd()
+        fresh_socket = FakeSocket()
+        dogpound.socket = fresh_socket
+        t.assert_equal(fresh_socket, dogpound.socket)
+        t.assert_not_equal(FakeSocket(), dogpound.socket)
+
+
 
 if __name__ == '__main__':
     statsd = statsd
