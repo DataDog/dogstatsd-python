@@ -70,6 +70,8 @@ To suggest a feature, report a bug, or general discussion, head over
 Change Log
 ----------
 
+- 0.5.5
+    - Revert usage of Python property for socket introduced in 0.5.4, to avoid backward incompatibilities, and performance degradation
 - 0.5.4
     - Do not open a socket when `DogStatsd` is instantiated (thanks to [benweatherman](https://github.com/benweatherman))
 - 0.5.3
