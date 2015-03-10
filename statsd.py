@@ -46,23 +46,14 @@ class DogStatsd(object):
     def __exit__(self, type, value, traceback):
         self.close_buffer()
 
-    @property
-    def socket(self):
+    def get_socket(self):
         '''
         Return a connected socket
         '''
-        if not self._socket:
-            self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            self._socket.connect((self._host, self._port))
-        return self._socket
-
-    @socket.setter
-    def socket(self, value):
-        '''
-        Set the socket to an arbitrary value. Useful for testing, providing your own connection, or resetting the connection.
-        :param value: the value of the new socket. Use something falsy to reset the connection. Anything with a `send` method that accepts a string is valid.
-        '''
-        self._socket = value
+        if not self.socket:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.socket.connect((self._host, self._port))
+        return self.socket
 
     def open_buffer(self, max_buffer_size=50):
         '''
@@ -185,12 +176,13 @@ class DogStatsd(object):
 
     def _send_to_server(self, packet):
         try:
-            self.socket.send(packet.encode(self.encoding))
+            # If set, use socket directly
+            (self.socket or self.get_socket()).send(packet.encode(self.encoding))
         except socket.error:
-            log.info("Error submitting metric, will try refreshing the socket")
+            log.info("Error submitting packet, will try refreshing the socket")
             self.socket = None
             try:
-                self.socket.send(packet.encode(self.encoding))
+                self.get_socket().send(packet.encode(self.encoding))
             except socket.error:
                 log.exception("Failed to send packet with a newly binded socket")
 
@@ -241,10 +233,7 @@ class DogStatsd(object):
             raise Exception(u'Event "%s" payload is too big (more that 8KB), '
                             'event discarded' % title)
 
-        try:
-            self.socket.send(string.encode(self.encoding))
-        except Exception:
-            log.exception(u'Error submitting event "%s"' % title)
+        self._send(string)
 
     def service_check(self, check_name, status, tags=None, timestamp=None,
                       hostname=None, message=None):
@@ -266,10 +255,7 @@ class DogStatsd(object):
         if message:
             string = u'{0}|m:{1}'.format(string, message)
 
-        try:
-            self.socket.send(string.encode(self.encoding))
-        except Exception:
-            log.exception(u'Error submitting service check "{0}"'.format(check_name))
+        self._send(string)
 
 
 statsd = DogStatsd()
