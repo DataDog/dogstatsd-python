@@ -1,3 +1,7 @@
+DEPRECATED
+==========
+**DogStatsd is deprecated and not actively developed anymore. Please head over to https://github.com/DataDog/datadogpy**
+
 dogstatsd-python
 ================
 
@@ -69,7 +73,8 @@ To suggest a feature, report a bug, or general discussion, head over
 
 Change Log
 ----------
-
+- [DEPRECATED]
+  - Date: 2015.03.17
 - 0.5.5
     - Revert usage of Python property for socket introduced in 0.5.4, to avoid backward incompatibilities, and performance degradation
 - 0.5.4
