@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 DogStatsd is a Python client for DogStatsd, a Statsd fork for Datadog.
 """
@@ -21,7 +20,7 @@ log = logging.getLogger('dogstatsd')
 class DogStatsd(object):
     OK, WARNING, CRITICAL, UNKNOWN = (0, 1, 2, 3)
 
-    def __init__(self, host='localhost', port=8125, max_buffer_size=50):
+    def __init__(self, host='localhost', port=8125, max_buffer_size = 50):
         """
         Initialize a DogStatsd object.
 
@@ -31,13 +30,21 @@ class DogStatsd(object):
         :param port: the port of the DogStatsd server.
         :param max_buffer_size: Maximum number of metric to buffer before sending to the server if sending metrics in batch
         """
-        self._host = host
-        self._port = int(port)
+        self._host = None
+        self._port = None
         self.socket = None
         self.max_buffer_size = max_buffer_size
         self._send = self._send_to_server
-
+        self.connect(host, port)
         self.encoding = 'utf-8'
+
+    def get_socket(self):
+        '''
+        Return a connected socket
+        '''
+        if not self.socket:
+            self.connect(self._host, self._port)
+        return self.socket
 
     def __enter__(self):
         self.open_buffer(self.max_buffer_size)
@@ -45,15 +52,6 @@ class DogStatsd(object):
 
     def __exit__(self, type, value, traceback):
         self.close_buffer()
-
-    def get_socket(self):
-        '''
-        Return a connected socket
-        '''
-        if not self.socket:
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            self.socket.connect((self._host, self._port))
-        return self.socket
 
     def open_buffer(self, max_buffer_size=50):
         '''
@@ -67,7 +65,7 @@ class DogStatsd(object):
 
         '''
         self.max_buffer_size = max_buffer_size
-        self.buffer = []
+        self.buffer= []
         self._send = self._send_to_buffer
 
     def close_buffer(self):
@@ -76,6 +74,15 @@ class DogStatsd(object):
         '''
         self._send = self._send_to_server
         self._flush_buffer()
+
+    def connect(self, host, port):
+        """
+        Connect to the statsd server on the given host and port.
+        """
+        self._host = host
+        self._port = int(port)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.connect((self._host, self._port))
 
     def gauge(self, metric, value, tags=None, sample_rate=1):
         """
@@ -176,13 +183,12 @@ class DogStatsd(object):
 
     def _send_to_server(self, packet):
         try:
-            # If set, use socket directly
-            (self.socket or self.get_socket()).send(packet.encode(self.encoding))
+            self.socket.send(packet.encode(self.encoding))
         except socket.error:
-            log.info("Error submitting packet, will try refreshing the socket")
-            self.socket = None
+            log.info("Error submitting metric, will try refreshing the socket")
+            self.connect(self._host, self._port)
             try:
-                self.get_socket().send(packet.encode(self.encoding))
+                self.socket.send(packet.encode(self.encoding))
             except socket.error:
                 log.exception("Failed to send packet with a newly binded socket")
 
@@ -193,7 +199,7 @@ class DogStatsd(object):
 
     def _flush_buffer(self):
         self._send_to_server("\n".join(self.buffer))
-        self.buffer = []
+        self.buffer=[]
 
     def _escape_event_content(self, string):
         return string.replace('\n', '\\n')
@@ -233,7 +239,10 @@ class DogStatsd(object):
             raise Exception(u'Event "%s" payload is too big (more that 8KB), '
                             'event discarded' % title)
 
-        self._send(string)
+        try:
+            self.socket.send(string.encode(self.encoding))
+        except Exception:
+            log.exception(u'Error submitting event "%s"' % title)
 
     def service_check(self, check_name, status, tags=None, timestamp=None,
                       hostname=None, message=None):
@@ -255,7 +264,10 @@ class DogStatsd(object):
         if message:
             string = u'{0}|m:{1}'.format(string, message)
 
-        self._send(string)
+        try:
+            self.socket.send(string.encode(self.encoding))
+        except Exception:
+            log.exception(u'Error submitting service check "{0}"'.format(check_name))
 
 
 statsd = DogStatsd()
