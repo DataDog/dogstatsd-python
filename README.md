@@ -75,6 +75,8 @@ Change Log
 ----------
 - [DEPRECATED]
   - Date: 2015.03.17
+- 0.5.6
+    - Revert to 0.5.3 due to backward incompatibilities.
 - 0.5.5
     - Revert usage of Python property for socket introduced in 0.5.4, to avoid backward incompatibilities, and performance degradation
 - 0.5.4

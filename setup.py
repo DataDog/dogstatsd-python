@@ -3,13 +3,12 @@ import sys
 
 setup(
     name = "dogstatsd-python",
-    version = "0.5.5",
+    version = "0.5.6",
     author = "Datadog, Inc.",
     author_email = "packages@datadoghq.com",
     description = "Python bindings to Datadog's API and a user-facing command line tool.",
     py_modules=['statsd'],
     license = "BSD",
     keywords = "datadog data statsd metrics",
-    url = "http://www.datadoghq.com",
-    test_suite = "nose.collector"
+    url = "http://www.datadoghq.com"
 )
